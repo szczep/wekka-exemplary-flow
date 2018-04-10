@@ -1,6 +1,9 @@
-package pl.szczep.app;
+package pl.szczep.app.parsers;
 
 import java.time.LocalTime;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -18,5 +21,11 @@ public enum MessageTime {
         } else {
             return WORKING_HOURS;
         }
+    }
+
+    public static List<String> stringValues() {
+        return Arrays.stream(MessageTime.values())
+            .map(Enum::toString)
+            .collect(Collectors.toList());
     }
 }

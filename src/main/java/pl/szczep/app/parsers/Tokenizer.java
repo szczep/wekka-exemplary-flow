@@ -1,48 +1,21 @@
 package pl.szczep.app.parsers;
 
 
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-/**
- * Classify
- */
 public class Tokenizer {
 
-    public static String extractSender(String line) {
-        final Pattern pattern = Pattern.compile("\\] (.+?):");
-        final Matcher matcher = pattern.matcher(line);
-        return matcher.find() ? matcher.group(1) : "";
-    }
+    private static final int MAX_WORD_LENGTH = 20;
 
-    public static String extractMessage(String line) {
-        final Pattern pattern = Pattern.compile("\\] (.+?): (.*)");
-        final Matcher matcher = pattern.matcher(line);
-        return matcher.find() ? matcher.group(2) : "";
-    }
-
-    public static LocalTime extractTime(String line) {
-
-        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-            .appendPattern("h:m a")
-            .toFormatter();
-
-        final Pattern pattern = Pattern.compile("\\[(.+?)\\]");
-        final Matcher matcher = pattern.matcher(line);
-
-        return matcher.find() ? LocalTime.parse(matcher.group(1), formatter) : LocalTime.now();
-    }
-
-    public static boolean isLineStartingWithTime(String line) {
-        final Pattern pattern = Pattern.compile("^\\[(.+?)\\]");
-        return pattern.matcher(line).find();
-    }
-
-    public static boolean isLineANewDayStamp(String line) {
-        final Pattern pattern = Pattern.compile("^----.*----$");
-        return pattern.matcher(line).find();
+    public static List<String> extractWords(List<String> lines) {
+        return lines.stream()
+            .map(TextParser::extractMessage)
+            .flatMap(line -> Arrays.stream(line.toLowerCase().split("\\s+")))
+            .filter(word -> word.length() <= MAX_WORD_LENGTH)
+            .map(Stemming::stem)
+            .distinct()
+            .collect(Collectors.toList());
     }
 }

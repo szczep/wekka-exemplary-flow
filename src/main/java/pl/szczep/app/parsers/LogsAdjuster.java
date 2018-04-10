@@ -3,12 +3,22 @@ package pl.szczep.app.parsers;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
-/**
- * Classify
- */
+
 public class LogsAdjuster {
+
+    @SafeVarargs
+    public static <T> T apply(T initialValue, UnaryOperator<T>... unaryOperators) {
+
+        T parsedValue = initialValue;
+        for (UnaryOperator<T> operation : unaryOperators) {
+            parsedValue = operation.apply(parsedValue);
+        }
+
+        return parsedValue;
+    }
 
     public static List<String> mergeLinesWithNoTimeStamp(List<String> lines) {
         List<String> parsedLines = new LinkedList<>();
@@ -17,7 +27,7 @@ public class LogsAdjuster {
         for (int i = 1; i < lines.size(); i++) {
             String currentLine = lines.get(i);
 
-            if (!Tokenizer.isLineStartingWithTime(currentLine)) {
+            if (!TextParser.isLineStartingWithTime(currentLine)) {
                 lastLine = lastLine + " " + currentLine;
                 if (isLastLine(lines, i)) {
                     parsedLines.add(lastLine);
@@ -32,7 +42,7 @@ public class LogsAdjuster {
 
     public static List<String> cutNewDayLines(List<String> lines) {
         return lines.stream()
-            .filter(line -> !Tokenizer.isLineANewDayStamp(line))
+            .filter(line -> !TextParser.isLineANewDayStamp(line))
             .collect(Collectors.toList());
     }
 
